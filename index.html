@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Huffman Compressor</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #b7e4ea, #cfd6e3);
+            color: #fff;
+            text-align: center;
+            padding: 40px;
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: black;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        textarea {
+            width: 95%;
+            height: 120px;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            resize: none;
+            transition: box-shadow 0.3s ease;
+            align-items: center;
+            justify-content: center;
+        }
+        textarea:focus {
+            outline: none;
+            box-shadow: 0 0 10px #ffd700;
+        }
+        .button-group {
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px 25px;
+            margin: 0 10px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+            background: black;
+            color: white;
+            font-weight: bold;
+        }
+        button:hover {
+            transform: scale(1.05);
+            background: black;
+        }
+        button:active {
+            transform: scale(0.95);
+        }
+        #resetBtn {
+            background: black;
+            color: #fff;
+        }
+        #resetBtn:hover {
+            background: black;
+        }
+        #output {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1.1em;
+            line-height: 1.5;
+            word-wrap: break-word;
+            transition: opacity 0.5s ease;
+            color: black;
+        }
+        #output.loading {
+            opacity: 0.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Huffman Compressor</h1>
+        <textarea id="input" placeholder="Enter text to compress (e.g., md akram)"></textarea>
+        <div class="button-group">
+            <button onclick="compressText()">Compress</button>
+            <button id="resetBtn" onclick="resetForm()">Reset</button>
+        </div>
+        <div id="output"></div>
+    </div>
+
+    <script src="huffman.js"></script>
+    <script>
+        let huffmanCompress;
+
+        Module.onRuntimeInitialized = () => {
+            huffmanCompress = Module.cwrap('huffmanCompress', 'string', ['string']);
+            console.log("WebAssembly module initialized!");
+        };
+
+        function compressText() {
+            const input = document.getElementById("input").value;
+            const outputDiv = document.getElementById("output");
+
+            if (!input) {
+                outputDiv.innerText = "Please enter some text!";
+                return;
+            }
+
+            if (!huffmanCompress) {
+                outputDiv.innerText = "Module not yet initialized, please wait!";
+                return;
+            }
+
+            outputDiv.classList.add("loading");
+            outputDiv.innerText = "Compressing...";
+
+            // Simulate a slight delay for effect (remove if not wanted)
+            setTimeout(() => {
+                const compressed = huffmanCompress(input);
+                const ratio = (compressed.length / (input.length * 8)).toFixed(2);
+                outputDiv.innerText = `Compressed: ${compressed}\nCompression Ratio: ${ratio}`;
+                outputDiv.classList.remove("loading");
+            }, 500);
+        }
+
+        function resetForm() {
+            document.getElementById("input").value = "";
+            document.getElementById("output").innerText = "";
+        }
+    </script>
+</body>
+</html>
